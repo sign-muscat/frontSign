@@ -9,7 +9,7 @@ import store from "./store";
 import {ChakraProvider} from "@chakra-ui/react";
 import {BrowserRouter} from "react-router-dom";
 import { createStandaloneToast } from '@chakra-ui/react';
-const { ToastContainer, toast } = createStandaloneToast();
+const { ToastContainer } = createStandaloneToast();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
