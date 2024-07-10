@@ -32,9 +32,9 @@ function HandDetection() {
     hands.onResults(onResults);
 
     if (typeof webcamRef.current !== "undefined" && webcamRef.current !== null) {
-      camera = new cam.Camera(webcamRef.current.video, {
+      camera = new cam.Camera(webcamRef.current?.video, {
         onFrame: async () => {
-          await hands.send({image: webcamRef.current.video});
+          await hands.send({image: webcamRef.current?.video});
         },
         width: 640,
         height: 480
@@ -44,8 +44,8 @@ function HandDetection() {
   }, []);
 
    const onResults = (results) => {
-    const videoWidth = webcamRef.current.video.videoWidth;
-    const videoHeight = webcamRef.current.video.videoHeight;
+    const videoWidth = webcamRef.current?.video.videoWidth;
+    const videoHeight = webcamRef.current?.video.videoHeight;
 
     canvasRef.current.width = videoWidth;
     canvasRef.current.height = videoHeight;
@@ -53,8 +53,8 @@ function HandDetection() {
     const canvasElement = canvasRef.current;
     const canvasCtx = canvasElement.getContext("2d");
     canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.clearRect(0, 0, canvasElement?.width, canvasElement?.height);
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement?.width, canvasElement?.height);
     if (results.multiHandLandmarks) {
       for (const landmarks of results.multiHandLandmarks) {
         drawingUtils.drawConnectors(canvasCtx, landmarks, Hands.HAND_CONNECTIONS,
@@ -93,7 +93,6 @@ function HandDetection() {
 
   return (
     <VStack spacing={4} align="center" w="100%" p={5}>
-      <Heading>소리손글 퀴즈</Heading>
       <Box bg="gray.100" p={5} borderRadius="md" w="100%" maxW="640px">
         <Text fontWeight="bold" mb={4}>문제 1. 바나나</Text>
         <Text mb={4}>맞춘 문제 수: 0/10 (0%)</Text>
