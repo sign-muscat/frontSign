@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, VStack, Heading, Button, Text, HStack } from '@chakra-ui/react';
+import { Box, VStack, Button, Text, HStack } from '@chakra-ui/react';
 import HandDetection from '../HandDetection'; // HandDetection 컴포넌트를 별도 파일로 가정
 
 function SorisonQuiz() {
@@ -23,28 +23,34 @@ function SorisonQuiz() {
     return (
         <VStack spacing={8} align="center" w="100%" p={5}>
             <Box bg="gray.100" p={5} borderRadius="md" w="100%" maxW="500px">
-                <Text fontWeight="bold" mb={4}>게임 시작!</Text>
+                <Text fontWeight="bold" mb={4}>🙏🤲 게임 시작!</Text>
+            </Box>
+            <Box p={5} borderRadius="md" w="100%" maxW="500px">
                 <Text mb={4}>난이도:</Text>
                 <HStack spacing={4} justify="center">
                     <Button
-                        colorScheme={difficulty === '상' ? 'yellow' : 'gray'}
-                        onClick={() => handleDifficultySelect('상')}
+                        colorScheme={difficulty === '하' ? 'yellow' : 'gray'}
+                        onClick={() => handleDifficultySelect('하')}
                     >
-                        상
+                        쉬움
                     </Button>
                     <Button
                         colorScheme={difficulty === '중' ? 'yellow' : 'gray'}
                         onClick={() => handleDifficultySelect('중')}
                     >
-                        중
+                        보통
                     </Button>
                     <Button
-                        colorScheme={difficulty === '하' ? 'yellow' : 'gray'}
-                        onClick={() => handleDifficultySelect('하')}
+                        colorScheme={difficulty === '상' ? 'yellow' : 'gray'}
+                        onClick={() => handleDifficultySelect('상')}
                     >
-                        하
+                        어려움
                     </Button>
                 </HStack>
+            </Box>
+            <Box borderY="1px" borderColor="blueGray.50">
+                <Text fontWeight="bold">소리손글 퀴즈란?</Text>
+                <Text>화면의 손모양에 맞게 수어의 각 단계를 동작하여 정답을 맞추는 수어 학습용 퀴즈입니다.</Text>
             </Box>
             <Button colorScheme="blue" onClick={startGame} isDisabled={!difficulty}>
                 시작하기

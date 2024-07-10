@@ -6,7 +6,6 @@ function MainPage() {
     <div>
         <SorisonQuiz></SorisonQuiz>
         <Link to="/hand-detection">Hand Detection으로 이동</Link>
-
     </div>
   );
 }
