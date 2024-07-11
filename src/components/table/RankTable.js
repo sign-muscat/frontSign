@@ -43,7 +43,7 @@ function RankTable ({difficulty}) {
                 <Thead>
                     <Tr>
                         <Th textAlign="center" border={0} fontStyle=''>
-                            <Badge colorScheme="orange">{difficulty}</Badge>
+                            <Badge colorScheme="orange" py={1} px={2} fontSize={18} borderRadius="4px">{difficulty}</Badge>
                         </Th>
                         <Th textAlign="center" border={0}>닉네임</Th>
                         <Th textAlign="center" border={0}>플레이 시간</Th>

@@ -43,6 +43,14 @@ const theme = extendTheme({
                         bg: "amber.500",
                         color: "black",
                     }
+                },
+                gray: {
+                    bg: "blueGray.50",
+                    color: "black",
+                    _hover: {
+                        bg: "blueGray.100",
+                        color: "black",
+                    }
                 }
             }
         },
