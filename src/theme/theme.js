@@ -15,6 +15,37 @@ const theme = extendTheme({
             800: '#37474F',
             900: '#263238',
         },
+
+        amber: {
+            50: '#FFF8E1',
+            100: '#FFECB3',
+            200: '#FFE082',
+            300: '#FFD54F',
+            400: '#FFCA28',
+            500: '#FFC107',
+            600: '#FFB300',
+            700: '#FFA000',
+            800: '#FF8F00',
+            900: '#FF6F00',
+            A100: '#FFE57F',
+            A200: '#FFD740',
+            A300: '#FFC400',
+            A400: '#FFAB00',
+        },
     },
+    components: {
+        Button: {
+            variants : {
+                amber: {
+                    bg: "amber.300",
+                    color: "black",
+                    _hover : {
+                        bg: "amber.500",
+                        color: "black",
+                    }
+                }
+            }
+        },
+    }
 })
 export default theme;

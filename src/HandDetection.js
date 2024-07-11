@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Box, VStack, Heading, Text, Button, Image, Progress } from '@chakra-ui/react';
+import { Box, VStack, Text, Button, Image, Progress } from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
