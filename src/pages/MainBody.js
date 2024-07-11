@@ -29,20 +29,20 @@ function SorisonQuiz() {
                 <Text mb={4}>난이도:</Text>
                 <HStack spacing={4} justify="center">
                     <Button
-                        colorScheme={difficulty === '하' ? 'yellow' : 'gray'}
-                        onClick={() => handleDifficultySelect('하')}
+                        colorScheme={difficulty === '쉬움' ? 'yellow' : 'gray'}
+                        onClick={() => handleDifficultySelect('쉬움')}
                     >
                         쉬움
                     </Button>
                     <Button
-                        colorScheme={difficulty === '중' ? 'yellow' : 'gray'}
-                        onClick={() => handleDifficultySelect('중')}
+                        colorScheme={difficulty === '보통' ? 'yellow' : 'gray'}
+                        onClick={() => handleDifficultySelect('보통')}
                     >
                         보통
                     </Button>
                     <Button
-                        colorScheme={difficulty === '상' ? 'yellow' : 'gray'}
-                        onClick={() => handleDifficultySelect('상')}
+                        colorScheme={difficulty === '어려움' ? 'yellow' : 'gray'}
+                        onClick={() => handleDifficultySelect('어려움')}
                     >
                         어려움
                     </Button>
