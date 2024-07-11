@@ -22,7 +22,6 @@ function RegistRank({difficulty, correctNum}) {
         dispatch(callRegisterRankAPI({rankRequest}));
     }
 
-
     return (
         <>
             <Button
