@@ -3,10 +3,12 @@ import QuestionTable from "../components/table/QuestionTable";
 import RegistRank from "../components/button/RegistRank";
 import {useNavigate} from "react-router-dom";
 
-function ResultPage() {
+function ResultPage(/*{ difficulty, correctNum }*/) {
     const navigate = useNavigate();
 
-    let correctNum = 3;
+    /* 이후 props로 전달 받을 예정 */
+    const difficulty = 'easy';
+    const correctNum = 3;
 
     return (
         <>
@@ -20,10 +22,10 @@ function ResultPage() {
             </Box>
             <QuestionTable/>
             <Flex justifyContent='flex-end' my={30} mr={4}>
-                <Button colorScheme='gray' size='sm' mx='5px'  onClick={() => navigate('/')}>
+                <Button colorScheme='gray' size='sm' mx='5px' onClick={() => navigate('/')}>
                     메인으로
                 </Button>
-                <RegistRank correctNum={correctNum}/>
+                <RegistRank difficulty={difficulty} correctNum={correctNum}/>
             </Flex>
         </>
     );
