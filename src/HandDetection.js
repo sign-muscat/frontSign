@@ -93,7 +93,6 @@ function HandDetection() {
 
   return (
     <VStack spacing={4} align="center" w="100%" p={5}>
-      <Heading>소리손글 퀴즈</Heading>
       <Box bg="gray.100" p={5} borderRadius="md" w="100%" maxW="640px">
         <Text fontWeight="bold" mb={4}>문제 1. 바나나</Text>
         <Text mb={4}>맞춘 문제 수: 0/10 (0%)</Text>

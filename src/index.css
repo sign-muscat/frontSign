@@ -1,0 +1,5 @@
+@import url('pretendard/dist/web/static/pretendard.css');
+
+* {
+    font-family: 'Pretendard', sans-serif !important;
+}
