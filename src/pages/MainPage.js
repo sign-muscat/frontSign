@@ -1,12 +1,13 @@
-import {Box, Heading} from "@chakra-ui/react";
+import { Link } from 'react-router-dom';
+import SorisonQuiz from "./MainBody";
 
-function MainPage(){
-    return(
-        <>
-        <Box>메인페이지</Box>
-            <Heading>안녕하세요 저는 폰트입니다. 잘 적용 되었나요??</Heading>
-        </>
-    );
+function MainPage() {
+  return (
+    <div>
+        <SorisonQuiz></SorisonQuiz>
+        <Link to="/hand-detection">Hand Detection으로 이동</Link>
+    </div>
+  );
 }
 
 export default MainPage;
