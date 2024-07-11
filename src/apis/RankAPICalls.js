@@ -5,6 +5,7 @@ import {statusToastAlert} from "../utils/ToastUtils";
 export const callRegisterRankAPI = ({rankRequest}) => {
     return async (dispatch, getState) => {
         try {
+            /* back api 구현 이후에 연결 예정 */
             // const result = await request(
             //     'POST',
             //     '/back-end-link',
