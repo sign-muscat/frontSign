@@ -8,7 +8,7 @@ export const callRegisterRankAPI = ({rankRequest}) => {
             /* back api 구현 이후에 연결 예정 */
             // const result = await request(
             //     'POST',
-            //     '/back-end-link',
+            //     '/back-endpoint',
             //     {'Content-Type' : 'application/json'},
             //     JSON.stringify(rankRequest)
             // );
