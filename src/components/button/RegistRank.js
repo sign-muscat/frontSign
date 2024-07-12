@@ -7,7 +7,6 @@ import {
 import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {callRegisterRankAPI} from "../../apis/RankAPICalls";
-import {difficultyKor} from "../../utils/DifficultyUtil";
 
 function RegistRank({difficulty, correctNum}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -39,7 +38,7 @@ function RegistRank({difficulty, correctNum}) {
                     <ModalCloseButton />
                     <ModalBody>
                         <Text fontWeight='500' mb='1rem'>
-                            {difficultyKor(difficulty)} 난이도에서 {correctNum}문제를 맞추셨어요.
+                            {difficulty} 난이도에서 {correctNum}문제를 맞추셨어요.
                             점수를 저장해서 오늘 플레이한 사람들 중 몇 등인지 확인해보세요!
                         </Text>
                         <Input variant='outline' placeholder='닉네임을 입력하세요' onChange={onChangeHandler}/>
