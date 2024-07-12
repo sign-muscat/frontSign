@@ -124,8 +124,8 @@ function HandDetection() {
   return (
     <VStack spacing={5} align="center" w="100%" p={5}>
       <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
-        <Heading fontSize={30} fontWeight="600">문제 {questionNumber}. {questions[questionNumber - 1]}</Heading>
-        <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center" justifyContent="center">바나나</Flex>
+        <Heading fontSize={30} fontWeight="600">문제 {questionNumber}.</Heading>
+        <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center" justifyContent="center">{questions[questionNumber - 1]}</Flex>
       </Flex>
       <Box borderRadius="md" w="100%" maxW="640px">
         <Flex>
