@@ -1,13 +1,11 @@
-import { Link } from 'react-router-dom';
 import SorisonQuiz from "./MainBody";
+import {Box} from "@chakra-ui/react";
 
 function MainPage() {
   return (
-    <div>
+    <Box pb={10}>
         <SorisonQuiz></SorisonQuiz>
-        <Link to="/hand-detection">Hand Detection으로 이동</Link>
-        <Link to="/finish">결과 보기</Link>
-    </div>
+    </Box>
   );
 }
 
