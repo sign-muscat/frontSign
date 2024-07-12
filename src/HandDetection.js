@@ -1,24 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {
-  Box,
-  VStack,
-  Text,
-  Button,
-  Image,
-  Progress,
-  Heading,
-  Flex,
-  HStack,
-  Stepper,
-  Step,
-  StepIndicator, StepStatus, StepIcon, StepNumber, StepSeparator
-} from '@chakra-ui/react';
+import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes,Stepper,
+    Step, StepIndicator, StepStatus, StepIcon, StepNumber, StepSeparator} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
 import * as drawingUtils from '@mediapipe/drawing_utils';
 import Confetti from 'react-confetti';
 import { useNavigate } from 'react-router-dom';
+import CountdownCircleTimer from "./components/CountdownCircleTimer";
 
 function HandDetection() {
   const navigate = useNavigate();
@@ -31,25 +20,30 @@ function HandDetection() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
   let camera = null;
 
   const totalQuestions = 8;
   const posesPerQuestion = [3, 2, 4, 3, 5]; // 각 질문당 포즈의 갯수
   const questions = ["바나나", "사과", "오렌지", "포도", "키위"];
 
-  let paddingVertical;
-  if (posesPerQuestion[questionNumber - 1] === 1 || posesPerQuestion[questionNumber - 1] >= 6) {
-    paddingVertical = '0';
-  } else if (posesPerQuestion[questionNumber - 1] === 2) {
-    paddingVertical = '11rem';
-  } else if (posesPerQuestion[questionNumber - 1] === 3) {
-    paddingVertical = '8rem';
-  } else if (posesPerQuestion[questionNumber - 1] === 4) {
-    paddingVertical = '6rem';
-  } else if (posesPerQuestion[questionNumber - 1] === 5) {
-    paddingVertical = '4rem';
-  }
+  const flash = keyframes`
+    from { opacity: 1; }
+    to { opacity: 0; }
+  `;
 
+    let paddingVertical;
+    if (posesPerQuestion[questionNumber - 1] === 1 || posesPerQuestion[questionNumber - 1] >= 6) {
+        paddingVertical = '0';
+    } else if (posesPerQuestion[questionNumber - 1] === 2) {
+        paddingVertical = '11rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 3) {
+        paddingVertical = '8rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 4) {
+        paddingVertical = '6rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 5) {
+        paddingVertical = '4rem';
+    }
 
   useEffect(() => {
     const hands = new Hands({
@@ -116,6 +110,11 @@ function HandDetection() {
     const timer = setInterval(() => {
       setCountdown((prevCount) => {
         if (prevCount === 1) {
+          setIsFlashing(true);
+          setTimeout(() => {
+            setIsFlashing(false);
+          }, 300);
+
           clearInterval(timer);
           captureImage();
           return null;
@@ -215,30 +214,30 @@ function HandDetection() {
         <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
 
         <Flex justifyContent="center" position="absolute" h="100%" right="-100px" top="0" py={paddingVertical} >
-          <Stepper orientation='vertical' index={poseNumber - 1} gap="0" height='100%' justifyContent="center">
-            {Array.from({ length: posesPerQuestion[questionNumber - 1] }).map((_, index) => (
-                <Step key={index}>
-                  <StepIndicator
-                      sx={{
-                        borderColor : "amber.300!important",
-                        bg : index === poseNumber -1 ? 'amber.300' : index < poseNumber -1 ? ' amber.300!important':'white',
-                        color: index === poseNumber -1 ? 'white' : index < poseNumber -1 ? 'white':'black'
-                      }}
-                  >
-                    <StepStatus
-                        complete={<StepIcon />}
-                        incomplete={<StepNumber />}
-                        active={<StepNumber />}
-                    />
-                  </StepIndicator>
-                  <Flex flexShrink="0" h="32px" alignItems="center" justifyContent="center">
-                    {/*<StepTitle borderRadius="3px" py={1} px={2} color={index === questionNumber -1 ? 'amber.300': 'black'}>{index + 1} 단계</StepTitle>*/}
-                    {/*<StepDescription>description</StepDescription>*/}
-                  </Flex>
-                  <StepSeparator bg={index === poseNumber -1 ? 'blueGray.50' : index < poseNumber -1 ? ' amber.300!important':'blueGray.50' } />
-                </Step>
-            ))}
-          </Stepper>
+              <Stepper orientation='vertical' index={poseNumber - 1} gap="0" height='100%' justifyContent="center">
+                  {Array.from({ length: posesPerQuestion[questionNumber - 1] }).map((_, index) => (
+                      <Step key={index}>
+                          <StepIndicator
+                              sx={{
+                                  borderColor : "amber.300!important",
+                                  bg : index === poseNumber -1 ? 'amber.300' : index < poseNumber -1 ? ' amber.300!important':'white',
+                                  color: index === poseNumber -1 ? 'white' : index < poseNumber -1 ? 'white':'black'
+                              }}
+                          >
+                              <StepStatus
+                                  complete={<StepIcon />}
+                                  incomplete={<StepNumber />}
+                                  active={<StepNumber />}
+                              />
+                          </StepIndicator>
+                          <Flex flexShrink="0" h="32px" alignItems="center" justifyContent="center">
+                              {/*<StepTitle borderRadius="3px" py={1} px={2} color={index === questionNumber -1 ? 'amber.300': 'black'}>{index + 1} 단계</StepTitle>*/}
+                              {/*<StepDescription>description</StepDescription>*/}
+                          </Flex>
+                          <StepSeparator bg={index === poseNumber -1 ? 'blueGray.50' : index < poseNumber -1 ? ' amber.300!important':'blueGray.50' } />
+                      </Step>
+                  ))}
+              </Stepper>
         </Flex>
 
         <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
@@ -267,20 +266,22 @@ function HandDetection() {
             <Image src={capturedImage} alt="Captured" />
           )}
           {countdown && (
-            <Box
-              position="absolute"
-              top="50%"
-              left="50%"
-              transform="translate(-50%, -50%)"
-              bg="rgba(0,0,0,0.5)"
-              color="white"
-              fontSize="6xl"
-              p={4}
-              borderRadius="full"
-            >
-              {countdown}
-            </Box>
+              <Box position='absolute' top='0' right='0' p={4}>
+                <CountdownCircleTimer seconds={countdown} totalSeconds={3}/>
+              </Box>
           )}
+          {isFlashing && (
+              <Box
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  width="100%"
+                  height="100%"
+                  bg="white"
+                  animation={`${flash} 0.3s ease-out`}
+              />
+          )}
+
         </Box>
         {!capturedImage ? (
           <HStack justifyContent="space-between" mt={4}>
