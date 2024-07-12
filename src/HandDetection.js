@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes} from '@chakra-ui/react';
+import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes,Stepper,
+    Step, StepIndicator, StepStatus, StepIcon, StepNumber, StepSeparator} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
@@ -15,19 +16,34 @@ function HandDetection() {
   const [countdown, setCountdown] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [questionNumber, setQuestionNumber] = useState(1);
+  const [poseNumber, setPoseNumber] = useState(1); // 포즈 번호 추가
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
   let camera = null;
 
-  const totalQuestions = 5;
+  const totalQuestions = 8;
+  const posesPerQuestion = [3, 2, 4, 3, 5]; // 각 질문당 포즈의 갯수
   const questions = ["바나나", "사과", "오렌지", "포도", "키위"];
 
   const flash = keyframes`
     from { opacity: 1; }
     to { opacity: 0; }
   `;
+
+    let paddingVertical;
+    if (posesPerQuestion[questionNumber - 1] === 1 || posesPerQuestion[questionNumber - 1] >= 6) {
+        paddingVertical = '0';
+    } else if (posesPerQuestion[questionNumber - 1] === 2) {
+        paddingVertical = '11rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 3) {
+        paddingVertical = '8rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 4) {
+        paddingVertical = '6rem';
+    } else if (posesPerQuestion[questionNumber - 1] === 5) {
+        paddingVertical = '4rem';
+    }
 
   useEffect(() => {
     const hands = new Hands({
@@ -111,26 +127,80 @@ function HandDetection() {
   const captureImage = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setCapturedImage(imageSrc);
+
+    //서버로 이미지 전송 및 응답 처리 [임시]
+    fakeServerRequest(imageSrc).then((isCorrect) => {
+      if (isCorrect) {
+        nextPose(true);
+      } else {
+        nextPose(false);
+      }
+    });
   };
 
-  const nextQuestion = (isCorrect) => {
-    setAnsweredQuestions(prev => prev + 1);
+  const nextPose = (isCorrect) => {
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
     }
+    if (poseNumber < posesPerQuestion[questionNumber - 1]) {
+      setPoseNumber(prev => prev + 1);
+    } else {
+      nextQuestion();
+    }
+    setCapturedImage(null);
+  };
+
+  // const nextQuestion = (isCorrect) => {
+  //   setAnsweredQuestions(prev => prev + 1);
+  //   if (isCorrect) {
+  //     setCorrectAnswers(prev => prev + 1);
+  //     setShowConfetti(true);
+  //     setTimeout(() => setShowConfetti(false), 5000);
+  //   }
+  //   if (questionNumber < totalQuestions) {
+  //     setQuestionNumber(prev => prev + 1);
+  //     setCapturedImage(null);
+  //   } else {
+  //     // 모든 문제를 다 풀었을 때 결과 페이지로 이동
+  //     navigate('/finish', { state: { correctAnswers: isCorrect ? correctAnswers + 1 : correctAnswers, totalQuestions } });
+  //   }
+  // };
+
+  const nextQuestion = () => {
+    setAnsweredQuestions(prev => prev + 1);
     if (questionNumber < totalQuestions) {
       setQuestionNumber(prev => prev + 1);
-      setCapturedImage(null);
+      setPoseNumber(1);
     } else {
-      // 모든 문제를 다 풀었을 때 결과 페이지로 이동
-      navigate('/finish', { state: { correctAnswers: isCorrect ? correctAnswers + 1 : correctAnswers, totalQuestions } });
+      navigate('/finish', { state: { correctAnswers, totalQuestions } });
     }
   };
 
+
+  // const skipQuestion = () => {
+  //   nextQuestion(false);
+  // };
+
   const skipQuestion = () => {
-    nextQuestion(false);
+    setAnsweredQuestions(prev => prev + 1);
+    if (questionNumber < totalQuestions) {
+      setQuestionNumber(prev => prev + 1);
+      setPoseNumber(1);
+    } else {
+      navigate('/finish', { state: { correctAnswers, totalQuestions } });
+    }
+  };
+
+  // 서버로 이미지 전송 및 응답을 가정한 함수
+  const fakeServerRequest = (imageSrc) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const isCorrect = Math.random() > 0.5; // 임의로 정답 여부 결정
+        resolve(isCorrect);
+      }, 1000);
+    });
   };
 
   return (
@@ -139,17 +209,39 @@ function HandDetection() {
         <Heading fontSize={30} fontWeight="600">문제 {questionNumber}.</Heading>
         <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center" justifyContent="center">{questions[questionNumber - 1]}</Flex>
       </Flex>
-      <Box borderRadius="md" w="100%" maxW="640px">
-        <Flex>
-          <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
-          <Box>
-            <Button>STEP 1</Button>
-            <Button>STEP 2</Button>
-          </Box>
+
+      <Box borderRadius="md" w="100%" maxW="640px" position="relative">
+        <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
+
+        <Flex justifyContent="center" position="absolute" h="100%" right="-100px" top="0" py={paddingVertical} >
+              <Stepper orientation='vertical' index={poseNumber - 1} gap="0" height='100%' justifyContent="center">
+                  {Array.from({ length: posesPerQuestion[questionNumber - 1] }).map((_, index) => (
+                      <Step key={index}>
+                          <StepIndicator
+                              sx={{
+                                  borderColor : "amber.300!important",
+                                  bg : index === poseNumber -1 ? 'amber.300' : index < poseNumber -1 ? ' amber.300!important':'white',
+                                  color: index === poseNumber -1 ? 'white' : index < poseNumber -1 ? 'white':'black'
+                              }}
+                          >
+                              <StepStatus
+                                  complete={<StepIcon />}
+                                  incomplete={<StepNumber />}
+                                  active={<StepNumber />}
+                              />
+                          </StepIndicator>
+                          <Flex flexShrink="0" h="32px" alignItems="center" justifyContent="center">
+                              {/*<StepTitle borderRadius="3px" py={1} px={2} color={index === questionNumber -1 ? 'amber.300': 'black'}>{index + 1} 단계</StepTitle>*/}
+                              {/*<StepDescription>description</StepDescription>*/}
+                          </Flex>
+                          <StepSeparator bg={index === poseNumber -1 ? 'blueGray.50' : index < poseNumber -1 ? ' amber.300!important':'blueGray.50' } />
+                      </Step>
+                  ))}
+              </Stepper>
         </Flex>
+
         <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
-        <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden"
-             >
+        <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
           {!capturedImage ? (
             <>
               <Webcam
@@ -199,12 +291,18 @@ function HandDetection() {
             </Button>
           </HStack>
         ) : (
-          <HStack justifyContent="space-between" mt={4}>
-            <Button onClick={() => nextQuestion(false)}>틀림</Button>
-            <Button onClick={() => nextQuestion(true)} colorScheme="green">
-              맞음
-            </Button>
-          </HStack>
+          // <HStack justifyContent="space-between" mt={4}>
+          //   <Button onClick={() => nextQuestion(false)}>틀림</Button>
+          //   <Button onClick={() => nextQuestion(true)} colorScheme="green">
+          //     맞음
+          //   </Button>
+          // </HStack>
+            <HStack justifyContent="space-between" mt={4}>
+              <Button onClick={() => nextPose(false)}>틀림</Button>
+              <Button onClick={() => nextPose(true)} colorScheme="green">
+                맞음
+              </Button>
+            </HStack>
         )}
       </Box>
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
