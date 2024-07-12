@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack} from '@chakra-ui/react';
+import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
 import * as drawingUtils from '@mediapipe/drawing_utils';
 import Confetti from 'react-confetti';
 import { useNavigate } from 'react-router-dom';
+import CountdownCircleTimer from "./components/CountdownCircleTimer";
 
 function HandDetection() {
   const navigate = useNavigate();
@@ -17,10 +18,16 @@ function HandDetection() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
   let camera = null;
 
   const totalQuestions = 5;
   const questions = ["바나나", "사과", "오렌지", "포도", "키위"];
+
+  const flash = keyframes`
+    from { opacity: 1; }
+    to { opacity: 0; }
+  `;
 
   useEffect(() => {
     const hands = new Hands({
@@ -87,6 +94,11 @@ function HandDetection() {
     const timer = setInterval(() => {
       setCountdown((prevCount) => {
         if (prevCount === 1) {
+          setIsFlashing(true);
+          setTimeout(() => {
+            setIsFlashing(false);
+          }, 300);
+
           clearInterval(timer);
           captureImage();
           return null;
@@ -136,7 +148,8 @@ function HandDetection() {
           </Box>
         </Flex>
         <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
-        <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
+        <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden"
+             >
           {!capturedImage ? (
             <>
               <Webcam
@@ -161,20 +174,22 @@ function HandDetection() {
             <Image src={capturedImage} alt="Captured" />
           )}
           {countdown && (
-            <Box
-              position="absolute"
-              top="50%"
-              left="50%"
-              transform="translate(-50%, -50%)"
-              bg="rgba(0,0,0,0.5)"
-              color="white"
-              fontSize="6xl"
-              p={4}
-              borderRadius="full"
-            >
-              {countdown}
-            </Box>
+              <Box position='absolute' top='0' right='0' p={4}>
+                <CountdownCircleTimer seconds={countdown} totalSeconds={3}/>
+              </Box>
           )}
+          {isFlashing && (
+              <Box
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  width="100%"
+                  height="100%"
+                  bg="white"
+                  animation={`${flash} 0.3s ease-out`}
+              />
+          )}
+
         </Box>
         {!capturedImage ? (
           <HStack justifyContent="space-between" mt={4}>
