@@ -12,7 +12,7 @@ function App() {
         <Route index element={<MainPage/>}/>
         <Route path="game" element={<GamePage/>}/>
         <Route path="finish" element={<ResultPage/>}/>
-        <Route path="hand-detection" element={<HandDetection/>}/>
+        {/*<Route path="hand-detection" element={<HandDetection/>}/>*/}
       </Route>
     </Routes>
   );
