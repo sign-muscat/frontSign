@@ -4,10 +4,23 @@ import {
     ModalContent, ModalFooter, ModalHeader, ModalOverlay,
     useDisclosure, Input
 } from "@chakra-ui/react";
+import {useDispatch} from "react-redux";
+import {useState} from "react";
+import {callRegisterRankAPI} from "../../apis/RankAPICalls";
+import {difficultyKor} from "../../utils/DifficultyUtil";
 
-function RegistRank({correctNum}) {
+function RegistRank({difficulty, correctNum}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const difficulty = '어려움';
+
+    const dispatch = useDispatch();
+    const [name, setName] = useState();
+
+    const onChangeHandler = e => setName(e.target.value);
+
+    const onClickHandler = () => {
+        const rankRequest = { difficulty, correctNum, name }
+        dispatch(callRegisterRankAPI({rankRequest}));
+    }
 
     return (
         <>
@@ -26,17 +39,19 @@ function RegistRank({correctNum}) {
                     <ModalCloseButton />
                     <ModalBody>
                         <Text fontWeight='500' mb='1rem'>
-                            {difficulty} 난이도에서 {correctNum}문제를 맞추셨어요.
+                            {difficultyKor(difficulty)} 난이도에서 {correctNum}문제를 맞추셨어요.
                             점수를 저장해서 오늘 플레이한 사람들 중 몇 등인지 확인해보세요!
                         </Text>
-                        <Input variant='outline' placeholder='닉네임을 입력하세요'/>
+                        <Input variant='outline' placeholder='닉네임을 입력하세요' onChange={onChangeHandler}/>
                     </ModalBody>
 
                     <ModalFooter>
                         <Button colorScheme='gray' mr={3} onClick={onClose}>
                             취소
                         </Button>
-                        <Button colorScheme='yellow'>저장</Button>
+                        <Button colorScheme='yellow' onClick={onClickHandler}>
+                            저장
+                        </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

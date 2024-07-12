@@ -103,7 +103,6 @@ function SorisonQuiz() {
                     <RankTable difficulty="쉬움"/>
                 </Box>
             </Box>
-
         </VStack>
     );
 }

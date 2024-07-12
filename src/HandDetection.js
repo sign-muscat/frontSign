@@ -1,19 +1,26 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {Box, VStack, Text, Button, Image, Progress, Heading, Flex} from '@chakra-ui/react';
+import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
 import * as drawingUtils from '@mediapipe/drawing_utils';
 import Confetti from 'react-confetti';
+import { useNavigate } from 'react-router-dom';
 
 function HandDetection() {
+  const navigate = useNavigate();
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [countdown, setCountdown] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [step, setStep] = useState(1);
+  const [questionNumber, setQuestionNumber] = useState(1);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   let camera = null;
+
+  const totalQuestions = 5;
+  const questions = ["바나나", "사과", "오렌지", "포도", "키위"];
 
   useEffect(() => {
     const hands = new Hands({
@@ -34,16 +41,26 @@ function HandDetection() {
     if (typeof webcamRef.current !== "undefined" && webcamRef.current !== null) {
       camera = new cam.Camera(webcamRef.current.video, {
         onFrame: async () => {
-          await hands.send({image: webcamRef.current.video});
+          if (webcamRef.current && webcamRef.current.video) {
+            await hands.send({image: webcamRef.current.video});
+          }
         },
         width: 640,
         height: 480
       });
       camera.start();
     }
+
+    return () => {
+      if (camera) {
+        camera.stop();
+      }
+    };
   }, []);
 
-   const onResults = (results) => {
+  const onResults = (results) => {
+    if (!webcamRef.current || !webcamRef.current.video) return;
+
     const videoWidth = webcamRef.current.video.videoWidth;
     const videoHeight = webcamRef.current.video.videoHeight;
 
@@ -82,30 +99,43 @@ function HandDetection() {
   const captureImage = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setCapturedImage(imageSrc);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 5000); // 5초 후 색종이 효과 중지
   };
 
-  const nextStep = () => {
-    setStep(step + 1);
-    setCapturedImage(null);
+  const nextQuestion = (isCorrect) => {
+    setAnsweredQuestions(prev => prev + 1);
+    if (isCorrect) {
+      setCorrectAnswers(prev => prev + 1);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+    if (questionNumber < totalQuestions) {
+      setQuestionNumber(prev => prev + 1);
+      setCapturedImage(null);
+    } else {
+      // 모든 문제를 다 풀었을 때 결과 페이지로 이동
+      navigate('/finish', { state: { correctAnswers: isCorrect ? correctAnswers + 1 : correctAnswers, totalQuestions } });
+    }
+  };
+
+  const skipQuestion = () => {
+    nextQuestion(false);
   };
 
   return (
     <VStack spacing={5} align="center" w="100%" p={5}>
       <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
-        <Heading fontSize={30} fontWeight="600">문제 1.</Heading>
+        <Heading fontSize={30} fontWeight="600">문제 {questionNumber}. {questions[questionNumber - 1]}</Heading>
         <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center" justifyContent="center">바나나</Flex>
       </Flex>
       <Box borderRadius="md" w="100%" maxW="640px">
         <Flex>
-          <Text mb={4}>맞춘 문제 수: 0/10 (0%)</Text>
+          <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
           <Box>
             <Button>STEP 1</Button>
             <Button>STEP 2</Button>
           </Box>
         </Flex>
-        <Progress value={0} max={10} mb={4} display="none"/>
+        <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
         <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
           {!capturedImage ? (
             <>
@@ -147,13 +177,19 @@ function HandDetection() {
           )}
         </Box>
         {!capturedImage ? (
-          <Button mt={4} onClick={startCountdown} isDisabled={countdown !== null}>
-            사진 찍기
-          </Button>
+          <HStack justifyContent="space-between" mt={4}>
+            <Button onClick={skipQuestion}>건너뛰기</Button>
+            <Button onClick={startCountdown} isDisabled={countdown !== null}>
+              사진 찍기
+            </Button>
+          </HStack>
         ) : (
-          <Button mt={4} onClick={nextStep}>
-            다음
-          </Button>
+          <HStack justifyContent="space-between" mt={4}>
+            <Button onClick={() => nextQuestion(false)}>틀림</Button>
+            <Button onClick={() => nextQuestion(true)} colorScheme="green">
+              맞음
+            </Button>
+          </HStack>
         )}
       </Box>
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
