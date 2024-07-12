@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Box, VStack, Text, Button, Image, Progress, HStack } from '@chakra-ui/react';
+import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import { Hands } from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
@@ -122,12 +122,21 @@ function HandDetection() {
   };
 
   return (
-    <VStack spacing={4} align="center" w="100%" p={5}>
-      <Box bg="gray.100" p={5} borderRadius="md" w="100%" maxW="640px">
-        <Text fontWeight="bold" mb={4}>문제 {questionNumber}. {questions[questionNumber - 1]}</Text>
-        <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
-        <Progress value={answeredQuestions} max={totalQuestions} mb={4} />
-        <Box position="relative" width="640px" height="480px">
+    <VStack spacing={5} align="center" w="100%" p={5}>
+      <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
+        <Heading fontSize={30} fontWeight="600">문제 {questionNumber}.</Heading>
+        <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center" justifyContent="center">{questions[questionNumber - 1]}</Flex>
+      </Flex>
+      <Box borderRadius="md" w="100%" maxW="640px">
+        <Flex>
+          <Text mb={4}>맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers/answeredQuestions*100).toFixed(1) : 0}%)</Text>
+          <Box>
+            <Button>STEP 1</Button>
+            <Button>STEP 2</Button>
+          </Box>
+        </Flex>
+        <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
+        <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
           {!capturedImage ? (
             <>
               <Webcam
