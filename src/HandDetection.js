@@ -132,48 +132,75 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     };
 
     const captureImage = async () => {
+        console.log('Debug values:');
+        console.log('questionNumber:', questionNumber);
+        console.log('poseNumber:', poseNumber);
+    
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
-
+    
         try {
             const imageBlob = await fetch(imageSrc).then(res => res.blob());
-
+            const wordNo = (questionNumber - 1) * 2 + poseNumber;
+            const wordDes = 100 + questionNumber;
+    
+            console.log('Calculated values:');
+            console.log('wordNo:', wordNo);
+            console.log('wordDes:', wordDes);
+    
             const formData = new FormData();
             formData.append('file', imageBlob, 'capture.jpg');
-            formData.append('wordNo', poseNumber.toString());
-            formData.append('wordDes', questionNumber.toString());
-
+            formData.append('wordNo', wordNo.toString());
+            formData.append('wordDes', wordDes.toString());
+    
+            console.log('Sending data to server:');
+            console.log('file:', imageBlob);
+            console.log('wordNo:', wordNo);
+            console.log('wordDes:', wordDes);
+    
             const response = await axios.post('http://localhost:8000/answerfile/', formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
-            console.log('Server response:', response.data);
-
-            if (response.data.isSimilar) {
-                nextPose(true);
+    
+            console.log('Full server response:', response);
+            console.log('Server response data:', response.data);
+            console.log('Server response status:', response.status);
+    
+            if (response.data) {
+                if (response.data.isSimilar !== undefined) {
+                    if (response.data.isSimilar) {
+                        nextPose(true);
+                    } else {
+                        setIsWrongAnswer(true);
+                        setIsAlertOpen(true);
+                    }
+                } else {
+                    console.warn('Server response does not contain isSimilar field');
+                }
+    
+                if (response.data.image) {
+                    setCapturedImage(`data:image/png;base64,${response.data.image}`);
+                } else {
+                    console.warn('Server did not return image data');
+                }
             } else {
-                setIsWrongAnswer(true);
-                setIsAlertOpen(true);
+                console.error('Server response is empty');
             }
-
-            if (response.data.image) {
-                setCapturedImage(`data:image/png;base64,${response.data.image}`);
-            } else {
-                console.error('Server did not return image data');
-                toast({
-                    title: "이미지 로드 실패",
-                    description: "서버에서 이미지 데이터를 받지 못했습니다.",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
-            }
-
+    
         } catch (error) {
             console.error('Error sending image to server:', error);
+            if (error.response) {
+                console.error('Server responded with error:', error.response.data);
+                console.error('Status code:', error.response.status);
+                console.error('Headers:', error.response.headers);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+            } else {
+                console.error('Error setting up request:', error.message);
+            }
             toast({
                 title: "오류 발생",
                 description: "서버에 이미지를 전송하는 중 오류가 발생했습니다.",
@@ -185,6 +212,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             setIsAlertOpen(true);
         }
     };
+    
 
     const nextPose = (isCorrect) => {
         if (isCorrect) {
