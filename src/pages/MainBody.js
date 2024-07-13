@@ -1,26 +1,20 @@
 import React, { useState } from 'react';
-import {Box, VStack, Button, Text, HStack, Flex, Badge, Heading} from '@chakra-ui/react';
-import HandDetection from '../HandDetection';
+import {Box, VStack, Button, Text, HStack, Flex, Badge} from '@chakra-ui/react';
 import {InfoOutlineIcon} from "@chakra-ui/icons";
-import RankTable from "../components/table/RankTable"; // HandDetection 컴포넌트를 별도 파일로 가정
+import TodayRank from "../components/TodayRank";
+import {useNavigate} from "react-router-dom";
 
 function SorisonQuiz() {
+    const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('쉬움');
-    const [gameStarted, setGameStarted] = useState(false);
 
     const handleDifficultySelect = (level) => {
         setDifficulty(level);
     };
 
     const startGame = () => {
-        if (difficulty) {
-            setGameStarted(true);
-        }
+        navigate('/game', {state: difficulty});
     };
-
-    if (gameStarted) {
-        return <HandDetection difficulty={difficulty} />;
-    }
 
     return (
         <VStack spacing={7} align="center" w="100%" p={5}>
@@ -79,30 +73,12 @@ function SorisonQuiz() {
                 </Flex>
             </Box>
 
-
             <Box borderY="1px" borderColor="blueGray.50" py={6} w="100%">
                 <Text fontWeight="bold" mb={2}>소리손글 퀴즈란?</Text>
                 <Text>화면의 손모양에 맞게 수어의 각 단계를 동작하여 정답을 맞추는 수어 학습용 퀴즈입니다.</Text>
             </Box>
 
-            <Box w="100%">
-                <Heading fontSize="30px">
-                    🏆 오늘의 랭킹 (2024/07/09)
-                </Heading>
-                <Text ml={10} mt={1}>오늘 하루 플레이한 게임의 총 정답률로 순위가 결정돼요.</Text>
-            </Box>
-
-            <Box w="100%" bg="gray.50" borderRadius="lg" p={5}>
-                <Box>
-                    <RankTable difficulty="어려움"/>
-                </Box>
-                <Box borderY="1px" borderColor="blueGray.50" marginY={5} py={8}>
-                    <RankTable difficulty="보통"/>
-                </Box>
-                <Box>
-                    <RankTable difficulty="쉬움"/>
-                </Box>
-            </Box>
+            <TodayRank/>
         </VStack>
     );
 }
