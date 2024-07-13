@@ -47,13 +47,14 @@ function GamePage() {
         },
     ]
 
-    const questionArr = words.map(word => word.wordDes);
-    const posesPerQuestion = words.map(word => word.wordNo); // 각 질문당 포즈의 갯수
-    const questions = words.map(word => word.wordName);
+    const questionArr = words.map(word => word.wordDes);    // 단어의 식별 번호 리스트
+    const posesPerQuestion = words.map(word => word.wordNo); // 단어의 포즈의 갯수 리스트
+    const questions = words.map(word => word.wordName);     // 단어의 이름 리스트
 
     return (
         <>
             <HandDetection
+                difficulty={difficulty}
                 totalQuestions={count}
                 questionArr={questionArr}
                 posesPerQuestion={posesPerQuestion}

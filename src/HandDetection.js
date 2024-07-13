@@ -13,17 +13,18 @@ import WordStepper from "./components/WordStepper";
 import {useDispatch} from "react-redux";
 import {callGetWordImageAPI} from "./apis/GameAPICalls";
 
-function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions}) {
+function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestion, questions}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
 
-    const [questionNumber, setQuestionNumber] = useState(1);
+    const [questionNumber, setQuestionNumber] = useState(1); // 현재 몇번째 문제인지
     const [poseNumber, setPoseNumber] = useState(1); // 포즈 번호 추가
-    const [correctAnswers, setCorrectAnswers] = useState(0);
-    const [answeredQuestions, setAnsweredQuestions] = useState(0);
+    const [correctAnswers, setCorrectAnswers] = useState(0); // 맞춘 문제 수
+    const [answeredQuestions, setAnsweredQuestions] = useState(0); // 푼 문제 수
+    const [wordList, setWordList] = useState([]);
 
     const [countdown, setCountdown] = useState(null);
     const [capturedImage, setCapturedImage] = useState(null);
@@ -44,6 +45,12 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     useEffect(() => {
         dispatch(callGetWordImageAPI(poseNumber))
     }, [poseNumber]);
+
+    useEffect(() => {
+        console.log("word: ", wordList);
+        if(questionNumber > totalQuestions)
+            navigate('/finish', {state: {wordList, difficulty}});
+    }, [wordList]);
 
     useEffect(() => {
         const hands = new Hands({
@@ -166,22 +173,26 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     };
 
     const nextQuestion = () => {
+        setWordList(prev => [
+            ...prev,
+            { wordDes: questionArr[questionNumber - 1], wordName: questions[questionNumber - 1], isCorrect: true}
+        ]);
         setAnsweredQuestions(prev => prev + 1);
+        setQuestionNumber(prev => prev + 1);
         if (questionNumber < totalQuestions) {
-            setQuestionNumber(prev => prev + 1);
             setPoseNumber(1);
-        } else {
-            navigate('/finish', {state: {correctAnswers, totalQuestions}});
         }
     };
 
     const skipQuestion = () => {
+        setWordList(prev => [
+            ...prev,
+            { wordDes: questionArr[questionNumber - 1], wordName: questions[questionNumber - 1], isCorrect: false}
+        ]);
         setAnsweredQuestions(prev => prev + 1);
+        setQuestionNumber(prev => prev + 1);
         if (questionNumber < totalQuestions) {
-            setQuestionNumber(prev => prev + 1);
             setPoseNumber(1);
-        } else {
-            navigate('/finish', {state: {correctAnswers, totalQuestions}});
         }
     };
 
