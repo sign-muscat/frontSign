@@ -27,10 +27,10 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     const canvasRef = useRef(null);
     const cameraRef = useRef(null);
 
-    const [questionNumber, setQuestionNumber] = useState(1);    // 현재 몇번째 문제인지
-    const [poseNumber, setPoseNumber] = useState(1);            // 포즈 번호
-    const [correctAnswers, setCorrectAnswers] = useState(0);    // 맞춘 문제 수
-    const [answeredQuestions, setAnsweredQuestions] = useState(0); // 푼 문제 수
+    const [questionNumber, setQuestionNumber] = useState(1);
+    const [poseNumber, setPoseNumber] = useState(1);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
+    const [answeredQuestions, setAnsweredQuestions] = useState(0);
     const [wordList, setWordList] = useState([]);
 
     const [countdown, setCountdown] = useState(null);
@@ -38,7 +38,6 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     const [showConfetti, setShowConfetti] = useState(false);
     const [isFlashing, setIsFlashing] = useState(false);
 
-    // 새로운 state 추가
     const [isWrongAnswer, setIsWrongAnswer] = useState(false);
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const cancelRef = React.useRef();
@@ -46,12 +45,8 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     const {wordImage} = useSelector(state => state.GameReducer);
 
     const flash = keyframes`
-        from {
-            opacity: 1;
-        }
-        to {
-            opacity: 0;
-        }
+        from { opacity: 1; }
+        to { opacity: 0; }
     `;
 
     useEffect(() => {
@@ -151,93 +146,32 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
 
-        try {
-            const imageBlob = await fetch(imageSrc).then(res => res.blob());
-            const wordNo = (questionNumber - 1) * 2 + poseNumber;
-            const wordDes = 100 + questionNumber;
+        const isCorrect = Math.random() < 0.8;  // 80% 확률로 정답 처리
 
-            console.log('Calculated values:');
-            console.log('wordNo:', wordNo);
-            console.log('wordDes:', wordDes);
-
-            const formData = new FormData();
-            formData.append('file', imageBlob, 'capture.jpg');
-            formData.append('wordNo', wordNo.toString());
-            formData.append('wordDes', wordDes.toString());
-
-            console.log('Sending data to server:');
-            console.log('file:', imageBlob);
-            console.log('wordNo:', wordNo);
-            console.log('wordDes:', wordDes);
-
-            const response = await axios.post('http://localhost:8000/answerfile', formData, {
-                // withCredentials: true,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            console.log('Full server response:', response);
-            console.log('Server response data:', response.data);
-            console.log('Server response status:', response.status);
-
-            if (response.data) {
-                if (response.data.isSimilar !== undefined) {
-                    if (response.data.isSimilar) {
-                        nextPose(true);
-                    } else {
-                        setIsWrongAnswer(true);
-                        setIsAlertOpen(true);
-                    }
-                } else {
-                    console.warn('Server response does not contain isSimilar field');
-                }
-
-                if (response.data.image) {
-                    setCapturedImage(`data:image/png;base64,${response.data.image}`);
-                } else {
-                    console.warn('Server did not return image data');
-                }
-            } else {
-                console.error('Server response is empty');
-            }
-
-        } catch (error) {
-            console.error('Error sending image to server:', error);
-            if (error.response) {
-                console.error('Server responded with error:', error.response.data);
-                console.error('Status code:', error.response.status);
-                console.error('Headers:', error.response.headers);
-            } else if (error.request) {
-                console.error('No response received:', error.request);
-            } else {
-                console.error('Error setting up request:', error.message);
-            }
-            toast({
-                title: "오류 발생",
-                description: "서버에 이미지를 전송하는 중 오류가 발생했습니다.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+        if (isCorrect) {
+            nextPose(true);  // 정답 처리
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 5000);
+        } else {
             setIsWrongAnswer(true);
             setIsAlertOpen(true);
         }
-    };
 
+    };
 
     const nextPose = (isCorrect) => {
         if (isCorrect) {
             setCorrectAnswers(prev => prev + 1);
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 5000);
         }
         if (poseNumber < posesPerQuestion[questionNumber - 1]) {
             setPoseNumber(prev => prev + 1);
         } else {
+            setAnsweredQuestions(prev => prev + 1);  // 여기에 추가
             onOpen();
         }
         setCapturedImage(null);
+        setIsWrongAnswer(false);
+        setIsAlertOpen(false);
     };
 
     const nextQuestion = () => {
@@ -257,14 +191,14 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
             ...prev,
             { wordDes: questionArr[questionNumber - 1], wordName: questions[questionNumber - 1], isCorrect: false}
         ]);
-        setAnsweredQuestions(prev => prev + 1);
+        // setAnsweredQuestions(prev => prev + 1);  // 이 줄을 제거
         setQuestionNumber(prev => prev + 1);
         if (questionNumber < totalQuestions) {
             setPoseNumber(1);
         }
+        nextPose(false);  // 여기에 추가
     };
 
-    // 틀렸을 때 다시 시도하는 함수
     const retryPose = () => {
         setCapturedImage(null);
         setIsWrongAnswer(false);
@@ -340,7 +274,6 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
                                    width="100%"
                                    height="100%"/>
                         }
-
                     </Box>
                     {!capturedImage && !isWrongAnswer && (
                         <HStack justifyContent="space-between" mt={4}>

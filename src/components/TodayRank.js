@@ -15,7 +15,12 @@ function TodayRank() {
     }, [dispatch]);
 
     const getRanksByDiff = (rankings, levels) => {
-        return rankings.filter(item => item.levels == levels);
+        const levelMap = {
+            "쉬움": "하",
+            "보통": "중",
+            "어려움": "상"
+        };
+        return rankings.filter(item => item.levels === levelMap[levels]);
     }
 
     return (
@@ -30,13 +35,13 @@ function TodayRank() {
 
             <Box w="100%" bg="gray.50" borderRadius="lg" p={5}>
                 <Box>
-                    <RankTable difficulty="어려움" ranks={getRanksByDiff(ranks, "difficult")}/>
+                    <RankTable difficulty="어려움" ranks={getRanksByDiff(ranks, "어려움")}/>
                 </Box>
                 <Box borderY="1px" borderColor="blueGray.50" marginY={5} py={8}>
-                    <RankTable difficulty="보통" ranks={getRanksByDiff(ranks, "medium")}/>
+                    <RankTable difficulty="보통" ranks={getRanksByDiff(ranks, "보통")}/>
                 </Box>
                 <Box>
-                    <RankTable difficulty="쉬움" ranks={getRanksByDiff(ranks, "easy")}/>
+                    <RankTable difficulty="쉬움" ranks={getRanksByDiff(ranks, "쉬움")}/>
                 </Box>
             </Box>
         </>

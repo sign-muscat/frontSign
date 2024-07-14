@@ -4,21 +4,25 @@ import {
     ModalContent, ModalFooter, ModalHeader, ModalOverlay,
     useDisclosure, Input
 } from "@chakra-ui/react";
-import {useDispatch} from "react-redux";
-import {useState} from "react";
-import {callRegisterRankAPI} from "../../apis/RankAPICalls";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";  // React Router의 useNavigate 훅 추가
+import { callRegisterRankAPI } from "../../apis/RankAPICalls";
 
 function RegistRank({difficulty, correctNum, wordList}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-
     const dispatch = useDispatch();
-    const [nickname, setNickname] = useState();
+    const navigate = useNavigate();  // useNavigate 훅 사용
+    const [nickname, setNickname] = useState("");
 
     const onChangeHandler = e => setNickname(e.target.value);
 
     const onClickHandler = () => {
-        const rankRequest = { nickname, difficulty, wordList }
-        dispatch(callRegisterRankAPI({rankRequest}));
+        const rankRequest = { nickname, difficulty, wordList };
+        dispatch(callRegisterRankAPI({rankRequest})).then(() => {
+            onClose();  // 모달 닫기
+            navigate('/');  // 메인 화면으로 이동 (경로는 실제 메인 화면 경로에 맞게 수정)
+        });
     }
 
     return (
@@ -54,7 +58,6 @@ function RegistRank({difficulty, correctNum, wordList}) {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-
         </>
     );
 }
