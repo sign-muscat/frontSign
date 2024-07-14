@@ -7,26 +7,11 @@ export const callGetWordsAPI = (difficulty, count) => {
         try {
             const queryString = `difficulty=${difficulty}&count=${count}`;
 
-            // const result = await request(
-            //     'GET',
-            //     `/get-words?${queryString}`
-            // );
+            const result = await request(
+                'GET',
+                `/get-words?${queryString}`
+            );
 
-            const result = {
-                status : 200,
-                data : [
-                    {
-                        wordDes: 1,
-                        poseCount:2,
-                        wordName: "바나나"
-                    },
-                    {
-                        wordDes: 2,
-                        poseCount:3,
-                        wordName: "사과"
-                    }
-                ]
-            }
             console.log('callGetWordsAPI result : ', result);
 
             if(result.status === 200) {
