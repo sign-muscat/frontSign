@@ -48,8 +48,6 @@ export const callGetWordImageAPI = (questionNumber, poseNumber) => {
                 poseStep: poseNumber
             };
 
-            console.log("requestData : ", requestData);
-
             const result = await request(
                 'POST',
                 `/gameStart`,
