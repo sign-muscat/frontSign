@@ -4,9 +4,6 @@ import {
     AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay
 } from '@chakra-ui/react';
 import Webcam from 'react-webcam';
-import {Hands} from '@mediapipe/hands';
-import * as cam from '@mediapipe/camera_utils';
-import * as drawingUtils from '@mediapipe/drawing_utils';
 import Confetti from 'react-confetti';
 import {useNavigate} from 'react-router-dom';
 import CountdownCircleTimer from "./components/CountdownCircleTimer";
@@ -15,14 +12,19 @@ import {useDispatch} from "react-redux";
 import {callGetWordImageAPI} from "./apis/GameAPICalls";
 import axios from 'axios';
 
+const api = axios.create({
+    baseURL: 'http://localhost:8000',
+    headers: {
+        'Content-Type': 'multipart/form-data',
+    },
+});
+
 function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const toast = useToast();
 
     const webcamRef = useRef(null);
-    const canvasRef = useRef(null);
-    const cameraRef = useRef(null);
 
     const [questionNumber, setQuestionNumber] = useState(1);
     const [poseNumber, setPoseNumber] = useState(1);
@@ -34,83 +36,18 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     const [showConfetti, setShowConfetti] = useState(false);
     const [isFlashing, setIsFlashing] = useState(false);
 
-    // 새로운 state 추가
     const [isWrongAnswer, setIsWrongAnswer] = useState(false);
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const cancelRef = React.useRef();
 
     const flash = keyframes`
-        from {
-            opacity: 1;
-        }
-        to {
-            opacity: 0;
-        }
+        from { opacity: 1; }
+        to { opacity: 0; }
     `;
 
     useEffect(() => {
         dispatch(callGetWordImageAPI(poseNumber))
-    }, [poseNumber, dispatch]);
-
-    useEffect(() => {
-        const hands = new Hands({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            }
-        });
-
-        hands.setOptions({
-            maxNumHands: 2,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-
-        hands.onResults(onResults);
-
-        if (typeof webcamRef.current !== "undefined" && webcamRef.current !== null) {
-            cameraRef.current = new cam.Camera(webcamRef.current.video, {
-                onFrame: async () => {
-                    if (webcamRef.current && webcamRef.current.video) {
-                        await hands.send({image: webcamRef.current.video});
-                    }
-                },
-                width: 640,
-                height: 480
-            });
-            cameraRef.current.start();
-        }
-
-        return () => {
-            if (cameraRef.current) {
-                cameraRef.current.stop();
-            }
-        };
-    }, []);
-
-    const onResults = (results) => {
-        if (!webcamRef.current || !webcamRef.current.video) return;
-
-        const videoWidth = webcamRef.current.video.videoWidth;
-        const videoHeight = webcamRef.current.video.videoHeight;
-
-        canvasRef.current.width = videoWidth;
-        canvasRef.current.height = videoHeight;
-
-        const canvasElement = canvasRef.current;
-        const canvasCtx = canvasElement.getContext("2d");
-        canvasCtx.save();
-        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-        if (results.multiHandLandmarks) {
-            for (const landmarks of results.multiHandLandmarks) {
-                drawingUtils.drawConnectors(canvasCtx, landmarks, Hands.HAND_CONNECTIONS,
-                    {color: '#00FF00', lineWidth: 5});
-                drawingUtils.drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
-            }
-        }
-        canvasCtx.restore();
-    }
+    }, [poseNumber, questionNumber, dispatch]);
 
     const startCountdown = () => {
         setCountdown(3);
@@ -132,10 +69,6 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     };
 
     const captureImage = async () => {
-        console.log('Debug values:');
-        console.log('questionNumber:', questionNumber);
-        console.log('poseNumber:', poseNumber);
-    
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
     
@@ -144,30 +77,12 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             const wordNo = (questionNumber - 1) * 2 + poseNumber;
             const wordDes = 100 + questionNumber;
     
-            console.log('Calculated values:');
-            console.log('wordNo:', wordNo);
-            console.log('wordDes:', wordDes);
-    
             const formData = new FormData();
             formData.append('file', imageBlob, 'capture.jpg');
             formData.append('wordNo', wordNo.toString());
             formData.append('wordDes', wordDes.toString());
     
-            console.log('Sending data to server:');
-            console.log('file:', imageBlob);
-            console.log('wordNo:', wordNo);
-            console.log('wordDes:', wordDes);
-    
-            const response = await axios.post('http://localhost:8000/answerfile/', formData, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-    
-            console.log('Full server response:', response);
-            console.log('Server response data:', response.data);
-            console.log('Server response status:', response.status);
+            const response = await api.post('/answerfile/', formData);
     
             if (response.data) {
                 if (response.data.isSimilar !== undefined) {
@@ -179,6 +94,13 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                     }
                 } else {
                     console.warn('Server response does not contain isSimilar field');
+                    toast({
+                        title: "서버 응답 오류",
+                        description: "서버 응답에 필요한 정보가 누락되었습니다.",
+                        status: "warning",
+                        duration: 3000,
+                        isClosable: true,
+                    });
                 }
     
                 if (response.data.image) {
@@ -188,31 +110,41 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                 }
             } else {
                 console.error('Server response is empty');
+                toast({
+                    title: "서버 응답 오류",
+                    description: "서버 응답이 비어있습니다.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
             }
     
         } catch (error) {
             console.error('Error sending image to server:', error);
+            let errorMessage = "서버와의 통신 중 오류가 발생했습니다.";
+            
             if (error.response) {
                 console.error('Server responded with error:', error.response.data);
-                console.error('Status code:', error.response.status);
-                console.error('Headers:', error.response.headers);
+                errorMessage = error.response.data.detail || errorMessage;
             } else if (error.request) {
                 console.error('No response received:', error.request);
+                errorMessage = "서버로부터 응답을 받지 못했습니다.";
             } else {
                 console.error('Error setting up request:', error.message);
             }
+
             toast({
                 title: "오류 발생",
-                description: "서버에 이미지를 전송하는 중 오류가 발생했습니다.",
+                description: errorMessage,
                 status: "error",
                 duration: 3000,
                 isClosable: true,
             });
+            
             setIsWrongAnswer(true);
             setIsAlertOpen(true);
         }
     };
-    
 
     const nextPose = (isCorrect) => {
         if (isCorrect) {
@@ -248,7 +180,6 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
         }
     };
 
-    // 틀렸을 때 다시 시도하는 함수
     const retryPose = () => {
         setCapturedImage(null);
         setIsWrongAnswer(false);
@@ -276,25 +207,14 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                 <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
                 <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
                     {!capturedImage ? (
-                        <>
-                            <Webcam
-                                ref={webcamRef}
-                                screenshotFormat="image/jpeg"
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    height: "100%",
-                                }}
-                            />
-                            <canvas
-                                ref={canvasRef}
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    height: "100%",
-                                }}
-                            />
-                        </>
+                        <Webcam
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }}
+                        />
                     ) : (
                         <Image src={capturedImage} alt="Captured"/>
                     )}
