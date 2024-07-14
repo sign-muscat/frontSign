@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 import {
-    Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes, useToast,
+    Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes, useDisclosure, useToast,
     AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay
 } from '@chakra-ui/react';
 import Webcam from 'react-webcam';
@@ -13,21 +13,25 @@ import CountdownCircleTimer from "./components/CountdownCircleTimer";
 import WordStepper from "./components/WordStepper";
 import {useDispatch, useSelector} from "react-redux";
 import {callGetWordImageAPI} from "./apis/GameAPICalls";
+import SuccessModal from "./components/SuccessModal";
 import axios from 'axios';
 
 function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestion, questions}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
     const toast = useToast();
 
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
     const cameraRef = useRef(null);
 
-    const [questionNumber, setQuestionNumber] = useState(1);
-    const [poseNumber, setPoseNumber] = useState(1);
-    const [correctAnswers, setCorrectAnswers] = useState(0);
-    const [answeredQuestions, setAnsweredQuestions] = useState(0);
+    const [questionNumber, setQuestionNumber] = useState(1);    // 현재 몇번째 문제인지
+    const [poseNumber, setPoseNumber] = useState(1);            // 포즈 번호
+    const [correctAnswers, setCorrectAnswers] = useState(0);    // 맞춘 문제 수
+    const [answeredQuestions, setAnsweredQuestions] = useState(0); // 푼 문제 수
+    const [wordList, setWordList] = useState([]);
 
     const [countdown, setCountdown] = useState(null);
     const [capturedImage, setCapturedImage] = useState(null);
@@ -51,8 +55,14 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     `;
 
     useEffect(() => {
-        dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
+        // dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
     }, [poseNumber, dispatch]);
+
+    useEffect(() => {
+        console.log("word: ", wordList);
+        if(questionNumber > totalQuestions)
+            navigate('/finish', {state: {wordList, difficulty}});
+    }, [wordList]);
 
     useEffect(() => {
         const hands = new Hands({
@@ -225,28 +235,32 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
         if (poseNumber < posesPerQuestion[questionNumber - 1]) {
             setPoseNumber(prev => prev + 1);
         } else {
-            nextQuestion();
+            onOpen();
         }
         setCapturedImage(null);
     };
 
     const nextQuestion = () => {
+        setWordList(prev => [
+            ...prev,
+            { wordDes: questionArr[questionNumber - 1], wordName: questions[questionNumber - 1], isCorrect: true}
+        ]);
         setAnsweredQuestions(prev => prev + 1);
+        setQuestionNumber(prev => prev + 1);
         if (questionNumber < totalQuestions) {
-            setQuestionNumber(prev => prev + 1);
             setPoseNumber(1);
-        } else {
-            navigate('/finish', {state: {correctAnswers, totalQuestions}});
         }
     };
 
     const skipQuestion = () => {
+        setWordList(prev => [
+            ...prev,
+            { wordDes: questionArr[questionNumber - 1], wordName: questions[questionNumber - 1], isCorrect: false}
+        ]);
         setAnsweredQuestions(prev => prev + 1);
+        setQuestionNumber(prev => prev + 1);
         if (questionNumber < totalQuestions) {
-            setQuestionNumber(prev => prev + 1);
             setPoseNumber(1);
-        } else {
-            navigate('/finish', {state: {correctAnswers, totalQuestions}});
         }
     };
 
@@ -258,109 +272,112 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     };
 
     return (
-        <VStack spacing={5} align="center" w="100%" p={5}>
-            <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
-                <Heading fontSize={30} fontWeight="600">문제 {questionNumber}.</Heading>
-                <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center"
-                      justifyContent="center">{questions[questionNumber - 1]}</Flex>
-            </Flex>
+        <>
+            <VStack spacing={5} align="center" w="100%" p={5}>
+                <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
+                    <Heading fontSize={30} fontWeight="600">문제 {questionNumber}.</Heading>
+                    <Flex bg="blueGray.50" w="80%" h="100%" borderRadius="5px" fontWeight="600" alignItems="center"
+                          justifyContent="center">{questions[questionNumber - 1]}</Flex>
+                </Flex>
 
-            <Box borderRadius="md" w="100%" maxW="640px" position="relative">
-                <Text mb={4}>
-                    맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers / answeredQuestions * 100).toFixed(1) : 0}%)
-                </Text>
-                <WordStepper
-                    questionNumber={questionNumber}
-                    posesPerQuestion={posesPerQuestion}
-                    poseNumber={poseNumber}
-                />
+                <Box borderRadius="md" w="100%" maxW="640px" position="relative">
+                    <Text mb={4}>
+                        맞춘 문제 수: {correctAnswers}/{answeredQuestions} ({answeredQuestions > 0 ? (correctAnswers / answeredQuestions * 100).toFixed(1) : 0}%)
+                    </Text>
+                    <WordStepper
+                        questionNumber={questionNumber}
+                        posesPerQuestion={posesPerQuestion}
+                        poseNumber={poseNumber}
+                    />
 
-                <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
-                <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
-                    {!capturedImage ? (
-                        <>
-                            <Webcam
-                                ref={webcamRef}
-                                screenshotFormat="image/jpeg"
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    height: "100%",
-                                }}
+                    <Progress value={answeredQuestions} max={totalQuestions} mb={4} display="none"/>
+                    <Box position="relative" width="100%" height="376.5px" borderRadius={5} overflow="hidden">
+                        {!capturedImage ? (
+                            <>
+                                <Webcam
+                                    ref={webcamRef}
+                                    screenshotFormat="image/jpeg"
+                                    style={{
+                                        position: "absolute",
+                                        width: "100%",
+                                        height: "100%",
+                                    }}
+                                />
+                                <canvas
+                                    ref={canvasRef}
+                                    style={{
+                                        position: "absolute",
+                                        width: "100%",
+                                        height: "100%",
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <Image src={capturedImage} alt="Captured"/>
+                        )}
+                        {countdown && (
+                            <Box position='absolute' top='0' right='0' p={4}>
+                                <CountdownCircleTimer seconds={countdown} totalSeconds={3}/>
+                            </Box>
+                        )}
+                        {isFlashing && (
+                            <Box
+                                position="absolute"
+                                top={0}
+                                left={0}
+                                width="100%"
+                                height="100%"
+                                bg="white"
+                                animation={`${flash} 0.3s ease-out`}
                             />
-                            <canvas
-                                ref={canvasRef}
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    height: "100%",
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <Image src={capturedImage} alt="Captured"/>
+                        )}
+
+                    </Box>
+                    {!capturedImage && !isWrongAnswer && (
+                        <HStack justifyContent="space-between" mt={4}>
+                            <Button onClick={skipQuestion}>문제 건너뛰기</Button>
+                            <Button onClick={startCountdown} isDisabled={countdown !== null}>
+                                사진 찍기
+                            </Button>
+                        </HStack>
                     )}
-                    {countdown && (
-                        <Box position='absolute' top='0' right='0' p={4}>
-                            <CountdownCircleTimer seconds={countdown} totalSeconds={3}/>
-                        </Box>
-                    )}
-                    {isFlashing && (
-                        <Box
-                            position="absolute"
-                            top={0}
-                            left={0}
-                            width="100%"
-                            height="100%"
-                            bg="white"
-                            animation={`${flash} 0.3s ease-out`}
-                        />
+                    {isWrongAnswer && (
+                        <HStack justifyContent="space-between" mt={4}>
+                            <Button onClick={skipQuestion}>문제 건너뛰기</Button>
+                            <Button onClick={retryPose} colorScheme="blue">
+                                다시 시도
+                            </Button>
+                        </HStack>
                     )}
                 </Box>
-                {!capturedImage && !isWrongAnswer && (
-                    <HStack justifyContent="space-between" mt={4}>
-                        <Button onClick={skipQuestion}>문제 건너뛰기</Button>
-                        <Button onClick={startCountdown} isDisabled={countdown !== null}>
-                            사진 찍기
-                        </Button>
-                    </HStack>
-                )}
-                {isWrongAnswer && (
-                    <HStack justifyContent="space-between" mt={4}>
-                        <Button onClick={skipQuestion}>문제 건너뛰기</Button>
-                        <Button onClick={retryPose} colorScheme="blue">
-                            다시 시도
-                        </Button>
-                    </HStack>
-                )}
-            </Box>
+                <AlertDialog
+                    isOpen={isAlertOpen}
+                    leastDestructiveRef={cancelRef}
+                    onClose={() => setIsAlertOpen(false)}
+                >
+                    <AlertDialogOverlay>
+                        <AlertDialogContent>
+                            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                                틀렸습니다!
+                            </AlertDialogHeader>
 
-            <AlertDialog
-                isOpen={isAlertOpen}
-                leastDestructiveRef={cancelRef}
-                onClose={() => setIsAlertOpen(false)}
-            >
-                <AlertDialogOverlay>
-                    <AlertDialogContent>
-                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            틀렸습니다!
-                        </AlertDialogHeader>
+                            <AlertDialogBody>
+                                정답과 일치하지 않습니다. 다시 시도해보세요.
+                            </AlertDialogBody>
 
-                        <AlertDialogBody>
-                            정답과 일치하지 않습니다. 다시 시도해보세요.
-                        </AlertDialogBody>
-
-                        <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={() => setIsAlertOpen(false)}>
-                                확인
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog>
-
-            {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight}/>}
-        </VStack>
+                            <AlertDialogFooter>
+                                <Button ref={cancelRef} onClick={() => setIsAlertOpen(false)}>
+                                    확인
+                                </Button>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialogOverlay>
+                </AlertDialog>
+                {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight}/>}
+            </VStack>
+            <SuccessModal nextQuestion={nextQuestion} isOpen={isOpen} onClose={onClose}
+                          wordDes={questionArr[questionNumber - 1]}/>
+        </>
     );
 }
 

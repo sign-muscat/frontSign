@@ -4,16 +4,29 @@ import {
     ModalBody,
     ModalContent,
     ModalFooter,
-    ModalOverlay, useDisclosure
+    ModalOverlay
 } from "@chakra-ui/react";
+import {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {callGetWordVideoAPI} from "../apis/GameAPICalls";
 
-function SuccessModal() {
-    const { isOpen, onOpen, onClose } = useDisclosure()
+function SuccessModal({nextQuestion, isOpen, onClose, wordDes}) {
+    const dispatch = useDispatch();
+    const {wordVideo} = useSelector(state => state.GameReducer);
+
+    useEffect(() => {
+        // if(wordDes)
+            // dispatch(callGetWordVideoAPI(wordDes));
+    }, [wordDes, dispatch]);
+
+    const onClickHandler = () => {
+        onClose();
+        nextQuestion();
+    }
 
     return(
+        wordVideo &&
         <>
-            <Button onClick={onOpen}>Open Modal</Button>
-
             <Modal onClose={onClose} isOpen={isOpen} isCentered size='lg'>
                 <ModalOverlay />
                 <ModalContent>
@@ -31,14 +44,14 @@ function SuccessModal() {
                         <Box
                             as='video'
                             controls
-                            src='http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20160325/271224/MOV000273095_700X466.webm'
+                            src={wordVideo.videoLink}
                             objectFit='contain'
                             mt={8}
                             borderRadius='md'
                         />
                     </ModalBody>
                     <ModalFooter justifyContent='center' my={5}>
-                        <Button colorScheme='yellow' onClick={onClose}>다음 문제</Button>
+                        <Button colorScheme='yellow' onClick={onClickHandler}>다음 문제</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

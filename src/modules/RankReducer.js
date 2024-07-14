@@ -8,7 +8,7 @@ const GET_RANKS = 'rank/GET_RANKS';
 const SUCCESS = 'rank/SUCCESS';
 
 export const { rank : {getRanks, success}} = createActions({
-    [GET_RANKS] : result => ({ ranks : result.data }),
+    [GET_RANKS] : result => ({ ranks : result.data.rankings }),
     [SUCCESS] : () => ({success : true})
 });
 

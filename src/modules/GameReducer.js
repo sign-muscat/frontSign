@@ -6,16 +6,19 @@ const initialState = {};
 /* 액션 */
 const GET_WORDS = 'game/GET_WORDS';
 const GET_WORD_IMAGE = 'game/GET_WORD_IMAGE';
+const GET_WORD_VIDEO = 'game/GET_WORD_VIDEO';
 
-export const { game : {getWords, getWordImage}} = createActions({
+export const { game : {getWords, getWordImage, getWordVideo}} = createActions({
     [GET_WORDS] : result => ({ words : result.data }),
-    [GET_WORD_IMAGE] : result => ({ wordImage : result.data.wordImg })
+    [GET_WORD_IMAGE] : result => ({ wordImage : result.data.wordImg }),
+    [GET_WORD_VIDEO] : result => ({ wordVideo : result.data })
 });
 
 /* 리듀서 */
 const GameReducer = handleActions({
     [GET_WORDS] : (state, {payload}) => payload,
-    [GET_WORD_IMAGE] : (state, {payload}) => payload
+    [GET_WORD_IMAGE] : (state, {payload}) => payload,
+    [GET_WORD_VIDEO] : (state, {payload}) => payload
 }, initialState);
 
 export default GameReducer;
