@@ -11,11 +11,11 @@ import Confetti from 'react-confetti';
 import {useNavigate} from 'react-router-dom';
 import CountdownCircleTimer from "./components/CountdownCircleTimer";
 import WordStepper from "./components/WordStepper";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {callGetWordImageAPI} from "./apis/GameAPICalls";
 import axios from 'axios';
 
-function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions}) {
+function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestion, questions}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const toast = useToast();
@@ -39,6 +39,8 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const cancelRef = React.useRef();
 
+    const wordImage = useSelector(state => state.GameReducer);
+
     const flash = keyframes`
         from {
             opacity: 1;
@@ -49,7 +51,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     `;
 
     useEffect(() => {
-        dispatch(callGetWordImageAPI(poseNumber))
+        dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
     }, [poseNumber, dispatch]);
 
     useEffect(() => {
@@ -135,40 +137,40 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
         console.log('Debug values:');
         console.log('questionNumber:', questionNumber);
         console.log('poseNumber:', poseNumber);
-    
+
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
-    
+
         try {
             const imageBlob = await fetch(imageSrc).then(res => res.blob());
             const wordNo = (questionNumber - 1) * 2 + poseNumber;
             const wordDes = 100 + questionNumber;
-    
+
             console.log('Calculated values:');
             console.log('wordNo:', wordNo);
             console.log('wordDes:', wordDes);
-    
+
             const formData = new FormData();
             formData.append('file', imageBlob, 'capture.jpg');
             formData.append('wordNo', wordNo.toString());
             formData.append('wordDes', wordDes.toString());
-    
+
             console.log('Sending data to server:');
             console.log('file:', imageBlob);
             console.log('wordNo:', wordNo);
             console.log('wordDes:', wordDes);
-    
+
             const response = await axios.post('http://localhost:8000/answerfile/', formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-    
+
             console.log('Full server response:', response);
             console.log('Server response data:', response.data);
             console.log('Server response status:', response.status);
-    
+
             if (response.data) {
                 if (response.data.isSimilar !== undefined) {
                     if (response.data.isSimilar) {
@@ -180,7 +182,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                 } else {
                     console.warn('Server response does not contain isSimilar field');
                 }
-    
+
                 if (response.data.image) {
                     setCapturedImage(`data:image/png;base64,${response.data.image}`);
                 } else {
@@ -189,7 +191,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             } else {
                 console.error('Server response is empty');
             }
-    
+
         } catch (error) {
             console.error('Error sending image to server:', error);
             if (error.response) {
@@ -212,7 +214,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             setIsAlertOpen(true);
         }
     };
-    
+
 
     const nextPose = (isCorrect) => {
         if (isCorrect) {
