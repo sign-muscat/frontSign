@@ -46,11 +46,11 @@ export const callGetWordImageAPI = (poseNumber) => {
 
 
 
-            // 1. 서버와 연결되지 않았을 때 HandDetecion.js에 사용할 임의의 데이터 -> 이렇게 했을때 일단 성공
+            // 서버와 연결되지 않았을 때 사용할 임의의 데이터
             const result = {
                 status: 200,
                 data: {
-                    image: "/images/actionQuestion/easy/값.png"  // 임의의 이미지 URL
+                    image: "/images/actionQuestion/normal/강아지_1.png"  // 임의의 이미지 URL
                 }
             };
             console.log('API 파일 안에서 호출 !!! 되랏!!! : ', result);

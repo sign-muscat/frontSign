@@ -20,9 +20,12 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
     const dispatch = useDispatch();
     const toast = useToast();
 
+
+
     //다소리 문제 이미지 적용 테스트
     //1. GameAPICalls 로 응답받는 데이터가 image URL 일 경우로 추측 하고 테스트 했을 경우!!-> 이건 성공
-    const getWordImage = useSelector((state) => state.GameReducer.wordImage);
+    const getWordImage = useSelector((state) => state.GameReducer.wordImage ? state.GameReducer.wordImage.image : undefined);
+    console.log("뭐야. 왜 안돼. :", getWordImage)
 
     useEffect(() => {
         console.log('업데이트된 getWordImage:', getWordImage);  // 상태가 업데이트될 때마다 로그 출력
@@ -209,18 +212,22 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             } else {
                 console.error('Error setting up request:', error.message);
             }
-            toast({
-                title: "오류 발생",
-                description: "서버에 이미지를 전송하는 중 오류가 발생했습니다.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            setIsWrongAnswer(true);
-            setIsAlertOpen(true);
         }
     };
 
+
+    // 서버로 이미지 전송 및 응답을 가정한 함수
+    const fakeServerRequest = (imageSrc) => {
+        /*TODO: 여기에 dispatch 해서 POST 요청 - 정답 확인 추가 (아래 임시 전송 지우고) */
+        /*TODO: 이미지, questionNumber를 키값 "wordDes"로, poseNumber를 키값 "wordNo"로 넘겨야 함. */
+
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const isCorrect = Math.random() > 0.5; // 임의로 정답 여부 결정
+                resolve(isCorrect);
+            }, 1000);
+        });
+    };
 
     const nextPose = (isCorrect) => {
         if (isCorrect) {
@@ -254,13 +261,6 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
         } else {
             navigate('/finish', {state: {correctAnswers, totalQuestions}});
         }
-    };
-
-    // 틀렸을 때 다시 시도하는 함수
-    const retryPose = () => {
-        setCapturedImage(null);
-        setIsWrongAnswer(false);
-        setIsAlertOpen(false);
     };
 
     return (
@@ -322,13 +322,9 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                             animation={`${flash} 0.3s ease-out`}
                         />
                     )}
-
-
                     <Image src={getWordImage} alt="Pose" position="absolute" top="0" left="0" width="100%" height="100%" />
-
-
                 </Box>
-                {!capturedImage && !isWrongAnswer && (
+                {!capturedImage && (
                     <HStack justifyContent="space-between" mt={4}>
                         <Button onClick={skipQuestion}>문제 건너뛰기</Button>
                         <Button onClick={startCountdown} isDisabled={countdown !== null}>
@@ -336,40 +332,7 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                         </Button>
                     </HStack>
                 )}
-                {isWrongAnswer && (
-                    <HStack justifyContent="space-between" mt={4}>
-                        <Button onClick={skipQuestion}>문제 건너뛰기</Button>
-                        <Button onClick={retryPose} colorScheme="blue">
-                            다시 시도
-                        </Button>
-                    </HStack>
-                )}
             </Box>
-
-            <AlertDialog
-                isOpen={isAlertOpen}
-                leastDestructiveRef={cancelRef}
-                onClose={() => setIsAlertOpen(false)}
-            >
-                <AlertDialogOverlay>
-                    <AlertDialogContent>
-                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            틀렸습니다!
-                        </AlertDialogHeader>
-
-                        <AlertDialogBody>
-                            정답과 일치하지 않습니다. 다시 시도해보세요.
-                        </AlertDialogBody>
-
-                        <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={() => setIsAlertOpen(false)}>
-                                확인
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog>
-
             {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight}/>}
         </VStack>
     );

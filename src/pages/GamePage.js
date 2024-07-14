@@ -58,7 +58,6 @@ function GamePage() {
                 questionArr={questionArr}
                 posesPerQuestion={posesPerQuestion}
                 questions={questions}
-                //difficulty //테스트를 위해 난이도 전달
             />
         </>
     )
