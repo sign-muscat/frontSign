@@ -2,9 +2,6 @@ import React, {useRef, useState, useEffect} from 'react';
 import {
     Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes
 } from '@chakra-ui/react';
-import React, { useRef, useState, useEffect } from 'react';
-import {Box, VStack, Text, Button, Image, Progress, Heading, Flex, HStack, keyframes,Stepper,
-    Step, StepIndicator, StepStatus, StepIcon, StepNumber, StepSeparator} from '@chakra-ui/react';
 import Webcam from 'react-webcam';
 import {Hands} from '@mediapipe/hands';
 import * as cam from '@mediapipe/camera_utils';
@@ -13,12 +10,20 @@ import Confetti from 'react-confetti';
 import {useNavigate} from 'react-router-dom';
 import CountdownCircleTimer from "./components/CountdownCircleTimer";
 import WordStepper from "./components/WordStepper";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {callGetWordImageAPI} from "./apis/GameAPICalls";
 
-function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions}) {
+function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions, difficulty}) { //2. 테스트를 위해 난이도 추가
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    //다소리 문제 이미지 적용 테스트
+    //1. GameAPICalls 로 응답받는 데이터가 image URL 일 경우로 추측 하고 테스트 했을 경우!!-> 이건 성공
+    // const getWordImage = useSelector((state) => state.GameReducer.wordImage.image);
+    //
+    // useEffect(() => {
+    //     console.log('업데이트된 getWordImage:', getWordImage);  // 상태가 업데이트될 때마다 로그 출력
+    // }, [getWordImage]);
 
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
@@ -43,9 +48,32 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
             opacity: 0;
         }
     `;
+    //다소리 문제 이미지 적용 테스트
+    //2. 받아 오는 단어 이름과, 포즈 숫자로 저장된 이미지 파일들 불러오기. -> 진행 중인데 중단!!
+    // 난이도를 변경하는 함수
+    // const getDifficultyLevel = (difficulty) => {
+    //     switch (difficulty) {
+    //         case '쉬움':
+    //             return 'easy';
+    //         case '보통':
+    //             return 'normal';
+    //         case '어려움':
+    //             return 'hard';
+    //         default:
+    //             return 'easy';
+    //     }
+    // };
+
+    //const wordImage = `../public/images/actionQuestion/${difficulty}/${questions[questionNumber - 1]}`;
+
+
 
     useEffect(() => {
+
         dispatch(callGetWordImageAPI(poseNumber))
+        //2. 테스트 중인데 중단!
+        //const difficultyLevel = getDifficultyLevel(difficulty); // 난이도 값을 설정
+        //dispatch(callGetWordImageAPI(poseNumber, difficultyLevel)); // poseNumber와 난이도 값 전달
     }, [poseNumber]);
 
     useEffect(() => {
@@ -188,6 +216,9 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
         }
     };
 
+
+    //console.log("마지막으로 찍어보는 값!!! poseImage!! : " , poseImage)
+    //console.log("마지막으로 찍어보는 값!!! getWordImage!! : " , getWordImage)
     return (
         <VStack spacing={5} align="center" w="100%" p={5}>
             <Flex w="100%" h="60px" justifyContent="space-between" alignItems="center">
@@ -247,6 +278,10 @@ function HandDetection({totalQuestions, questionArr, posesPerQuestion, questions
                             animation={`${flash} 0.3s ease-out`}
                         />
                     )}
+
+
+                    {/*<Image src={getWordImage} alt="Pose" position="absolute" top="0" left="0" width="100%" height="100%" />*/}
+
 
                 </Box>
                 {!capturedImage && (

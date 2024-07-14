@@ -43,6 +43,21 @@ export const callGetWordImageAPI = (poseNumber) => {
             // if(result.status === 200) {
             //     dispatch((getWordImage(result)));
             // }
+
+
+
+            // 1. 서버와 연결되지 않았을 때 HandDetecion.js에 사용할 임의의 데이터 -> 이렇게 했을때 일단 성공
+            const result = {
+                status: 200,
+                data: {
+                    image: "/images/actionQuestion/easy/값.png"  // 임의의 이미지 URL
+                }
+            };
+            console.log('API 파일 안에서 호출 !!! 되랏!!! : ', result);
+            if (result.status === 200) {
+                dispatch(getWordImage(result));  // 액션 호출
+            }
+
         } catch {
             const title = '문제가 발생했어요.';
             const desc = '다시 시도해주세요.';
