@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const SERVER_IP = `localhost`;
-const SERVER_PORT = `8080`;
+const SERVER_PORT = `8000`;
 const DEFAULT_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 
 export const request = async (method, url, headers, data) => {

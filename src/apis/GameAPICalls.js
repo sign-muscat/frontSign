@@ -27,35 +27,24 @@ export const callGetWordsAPI = (difficulty, count) => {
     }
 }
 
-export const callGetWordImageAPI = (poseNumber) => {
+export const callGetWordImageAPI = (questionNumber, poseNumber) => {
     return async (dispatch, getState) => {
         try {
-            const queryString = `word_no=${poseNumber}`;
-
-            /*TODO: Back 연결 후 테스트 시 주석 해제 */
-
-            // const result = await request(
-            //     'GET',
-            //     `/word_step?${queryString}`
-            // );
-            // console.log('callGetWordAPI result : ', result);
-            //
-            // if(result.status === 200) {
-            //     dispatch((getWordImage(result)));
-            // }
-
-
-
-            // 서버와 연결되지 않았을 때 사용할 임의의 데이터
-            const result = {
-                status: 200,
-                data: {
-                    image: "/images/actionQuestion/normal/강아지_1.png"  // 임의의 이미지 URL
-                }
+            const requestData = {
+                wordDes: questionNumber,
+                poseStep: poseNumber
             };
-            console.log('API 파일 안에서 호출 !!! 되랏!!! : ', result);
-            if (result.status === 200) {
-                dispatch(getWordImage(result));  // 액션 호출
+
+            const result = await request(
+                'POST',
+                `/gameStart`,
+                'Content-Type: application/x-www-form-urlencoded',
+                requestData
+            );
+            console.log('callGetWordImageAPI result : ', result);
+
+            if(result.status === 200) {
+                dispatch((getWordImage(result)));
             }
 
         } catch {

@@ -9,7 +9,7 @@ const GET_WORD_IMAGE = 'game/GET_WORD_IMAGE';
 
 export const { game : {getWords, getWordImage}} = createActions({
     [GET_WORDS] : result => ({ words : result.data }),
-    [GET_WORD_IMAGE] : result => ({ wordImage : result.data })
+    [GET_WORD_IMAGE] : result => ({ wordImage : result.data.wordImg })
 });
 
 /* 리듀서 */
