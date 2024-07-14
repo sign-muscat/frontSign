@@ -6,10 +6,9 @@ function MainLayout() {
 
     return (
         <main>
-            <Container maxW='xl' border='1px solid'>
+            <Container maxW='xl'>
                 
                 <Header/>
-                <Divider mb={5}/>
                 <Outlet/>
 
             </Container>

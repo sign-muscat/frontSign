@@ -55,7 +55,7 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     `;
 
     useEffect(() => {
-        dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
+        // dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
     }, [poseNumber, dispatch]);
 
     useEffect(() => {

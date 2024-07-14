@@ -34,7 +34,7 @@ function ResultPage() {
                 <Button colorScheme='gray' size='sm' mx='5px' onClick={() => navigate('/')}>
                     메인으로
                 </Button>
-                <RegistRank difficulty={difficulty} correctNum={correctNum}/>
+                <RegistRank difficulty={difficulty} correctNum={correctNum} wordList={wordList}/>
             </Flex>
         </>
     );

@@ -1,5 +1,4 @@
 import {request} from "./api";
-import {getRanks, success} from "../modules/RankReducer";
 import {statusToastAlert} from "../utils/ToastUtils";
 import {getWordImage, getWords, getWordVideo} from "../modules/GameReducer";
 
@@ -8,17 +7,31 @@ export const callGetWordsAPI = (difficulty, count) => {
         try {
             const queryString = `difficulty=${difficulty}&count=${count}`;
 
-            /*TODO: Back 연결 후 테스트 시 주석 해제 */
-
             // const result = await request(
             //     'GET',
             //     `/get-words?${queryString}`
             // );
-            // console.log('callGetWordsAPI result : ', result);
-            //
-            // if(result.status === 200) {
-            //     dispatch((getWords(result)));
-            // }
+
+            const result = {
+                status : 200,
+                data : [
+                    {
+                        wordDes: 1,
+                        wordNo:2,
+                        wordName: "바나나"
+                    },
+                    {
+                        wordDes: 2,
+                        wordNo:3,
+                        wordName: "사과"
+                    }
+                ]
+            }
+            console.log('callGetWordsAPI result : ', result);
+
+            if(result.status === 200) {
+                dispatch((getWords(result)));
+            }
         } catch {
             const title = '문제가 발생했어요.';
             const desc = '다시 시도해주세요.';

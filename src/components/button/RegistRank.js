@@ -8,16 +8,16 @@ import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {callRegisterRankAPI} from "../../apis/RankAPICalls";
 
-function RegistRank({difficulty, correctNum}) {
+function RegistRank({difficulty, correctNum, wordList}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const dispatch = useDispatch();
-    const [name, setName] = useState();
+    const [nickname, setNickname] = useState();
 
-    const onChangeHandler = e => setName(e.target.value);
+    const onChangeHandler = e => setNickname(e.target.value);
 
     const onClickHandler = () => {
-        const rankRequest = { difficulty, correctNum, name }
+        const rankRequest = { nickname, difficulty, wordList }
         dispatch(callRegisterRankAPI({rankRequest}));
     }
 

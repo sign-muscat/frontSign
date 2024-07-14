@@ -15,9 +15,9 @@ function SuccessModal({nextQuestion, isOpen, onClose, wordDes}) {
     const {wordVideo} = useSelector(state => state.GameReducer);
 
     useEffect(() => {
-        if(wordDes)
-            dispatch(callGetWordVideoAPI(wordDes));
-    }, [wordDes]);
+        // if(wordDes)
+            // dispatch(callGetWordVideoAPI(wordDes));
+    }, [wordDes, dispatch]);
 
     const onClickHandler = () => {
         onClose();
