@@ -4,7 +4,6 @@ import React from "react";
 
 function RankTable ({difficulty, ranks}) {
 
-    console.log("difficulty: ", difficulty, " / ranks : ", ranks)
     return (
         <>
             <Table textAlign="center">

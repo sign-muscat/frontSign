@@ -7,30 +7,15 @@ export const callGetWordsAPI = (difficulty, count) => {
         try {
             const queryString = `difficulty=${difficulty}&count=${count}`;
 
-            // const result = await request(
-            //     'GET',
-            //     `/get-words?${queryString}`
-            // );
+            const result = await request(
+                'GET',
+                `/get-words?${queryString}`
+            );
 
-            const result = {
-                status : 200,
-                data : [
-                    {
-                        wordDes: 1,
-                        wordNo:2,
-                        wordName: "바나나"
-                    },
-                    {
-                        wordDes: 2,
-                        wordNo:3,
-                        wordName: "사과"
-                    }
-                ]
-            }
             console.log('callGetWordsAPI result : ', result);
 
             if(result.status === 200) {
-                dispatch((getWords(result)));
+                dispatch(getWords(result));
             }
         } catch {
             const title = '문제가 발생했어요.';
@@ -57,7 +42,7 @@ export const callGetWordImageAPI = (questionNumber, poseNumber) => {
             console.log('callGetWordImageAPI result : ', result);
 
             if(result.status === 200) {
-                dispatch((getWordImage(result)));
+                dispatch(getWordImage(result));
             }
 
         } catch {
@@ -73,8 +58,6 @@ export const callGetWordVideoAPI = (wordDes) => {
         try {
             const queryString = `wordDes=${wordDes}`;
 
-            /*TODO: Back 연결 후 테스트 시 주석 해제 */
-
             const result = await request(
                 'GET',
                 `/get-video-link?${queryString}`
@@ -82,7 +65,7 @@ export const callGetWordVideoAPI = (wordDes) => {
             console.log('callGetWordVideoAPI result : ', result);
 
             if (result.status === 200) {
-                dispatch((getWordVideo(result)));
+                dispatch(getWordVideo(result));
             }
         } catch {
             const title = '문제가 발생했어요.';
