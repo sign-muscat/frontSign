@@ -25,7 +25,7 @@ function GamePage() {
                 difficulty={difficulty}
                 totalQuestions={count}
                 questionArr={wordList.map(word => word.wordDes)}   // 단어의 식별 번호 리스트
-                posesPerQuestion={wordList.map(word => word.wordNo)} // 단어의 포즈의 갯수 리스트
+                posesPerQuestion={wordList.map(word => word.poseCount)} // 단어의 포즈의 갯수 리스트
                 questions={wordList.map(word => word.wordName)}    // 단어의 이름 리스트
             />
         </>

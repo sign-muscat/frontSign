@@ -171,7 +171,7 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
             console.log('wordDes:', wordDes);
 
             const response = await axios.post('http://localhost:8000/answerfile', formData, {
-                withCredentials: true,
+                // withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
