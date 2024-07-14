@@ -27,22 +27,26 @@ export const callGetWordsAPI = (difficulty, count) => {
     }
 }
 
-export const callGetWordImageAPI = (poseNumber) => {
+export const callGetWordImageAPI = (questionNumber, poseNumber) => {
     return async (dispatch, getState) => {
         try {
-            const queryString = `word_no=${poseNumber}`;
+            const requestData = {
+                wordDes: questionNumber,
+                poseStep: poseNumber
+            };
 
-            /*TODO: Back 연결 후 테스트 시 주석 해제 */
+            const result = await request(
+                'POST',
+                `/gameStart`,
+                'Content-Type: application/x-www-form-urlencoded',
+                requestData
+            );
+            console.log('callGetWordImageAPI result : ', result);
 
-            // const result = await request(
-            //     'GET',
-            //     `/word_step?${queryString}`
-            // );
-            // console.log('callGetWordImageAPI result : ', result);
-            //
-            // if(result.status === 200) {
-            //     dispatch((getWordImage(result)));
-            // }
+            if(result.status === 200) {
+                dispatch((getWordImage(result)));
+            }
+
         } catch {
             const title = '문제가 발생했어요.';
             const desc = '다시 시도해주세요.';

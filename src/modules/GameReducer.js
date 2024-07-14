@@ -10,7 +10,7 @@ const GET_WORD_VIDEO = 'game/GET_WORD_VIDEO';
 
 export const { game : {getWords, getWordImage, getWordVideo}} = createActions({
     [GET_WORDS] : result => ({ words : result.data }),
-    [GET_WORD_IMAGE] : result => ({ wordImage : result.data }),
+    [GET_WORD_IMAGE] : result => ({ wordImage : result.data.wordImg }),
     [GET_WORD_VIDEO] : result => ({ wordVideo : result.data })
 });
 
