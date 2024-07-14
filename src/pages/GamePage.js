@@ -9,7 +9,7 @@ function GamePage() {
     const location = useLocation();
     const difficulty = location.state;
 
-    const {words} = useSelector(state => state.GameReducer);
+    const {wordList} = useSelector(state => state.GameReducer);
 
     // Total number of Questions
     const count = 2;
@@ -18,16 +18,15 @@ function GamePage() {
         dispatch(callGetWordsAPI(difficulty, count));
     }, [difficulty, dispatch]);
 
-
     return (
-        words &&
+        wordList && wordList.length > 0 &&
         <>
             <HandDetection
                 difficulty={difficulty}
                 totalQuestions={count}
-                questionArr={words.map(word => word.wordDes)}   // 단어의 식별 번호 리스트
-                posesPerQuestion={words.map(word => word.wordNo)} // 단어의 포즈의 갯수 리스트
-                questions={words.map(word => word.wordName)}    // 단어의 이름 리스트
+                questionArr={wordList.map(word => word.wordDes)}   // 단어의 식별 번호 리스트
+                posesPerQuestion={wordList.map(word => word.wordNo)} // 단어의 포즈의 갯수 리스트
+                questions={wordList.map(word => word.wordName)}    // 단어의 이름 리스트
             />
         </>
     )

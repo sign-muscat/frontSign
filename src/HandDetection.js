@@ -43,7 +43,7 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const cancelRef = React.useRef();
 
-    const wordImage = useSelector(state => state.GameReducer);
+    const {wordImage} = useSelector(state => state.GameReducer);
 
     const flash = keyframes`
         from {
@@ -55,7 +55,7 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
     `;
 
     useEffect(() => {
-        // dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
+        dispatch(callGetWordImageAPI(questionArr[questionNumber - 1], poseNumber))
     }, [poseNumber, dispatch]);
 
     useEffect(() => {
@@ -170,7 +170,7 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
             console.log('wordNo:', wordNo);
             console.log('wordDes:', wordDes);
 
-            const response = await axios.post('http://localhost:8000/answerfile/', formData, {
+            const response = await axios.post('http://localhost:8000/answerfile', formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -331,6 +331,15 @@ function HandDetection({difficulty, totalQuestions, questionArr, posesPerQuestio
                                 animation={`${flash} 0.3s ease-out`}
                             />
                         )}
+                        {!capturedImage && wordImage &&
+                            <Image src={wordImage} alt="Guide"
+                                   position="absolute"
+                                   top={0}
+                                   left={0}
+                                   opacity={0.3}
+                                   width="100%"
+                                   height="100%"/>
+                        }
 
                     </Box>
                     {!capturedImage && !isWrongAnswer && (
